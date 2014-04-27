@@ -2,20 +2,20 @@ package mx.com.edx.lightmq.impl;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import mx.com.edx.lightmq.QueueExecutor;
 
 /**
  *
  * @author edx
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class QueueExecutorImpl implements QueueExecutor {
 
-    ThreadPoolExecutor executor;
+    ExecutorService executor;
     ConcurrentLinkedQueue<Callable> queue;
     ConcurrentLinkedQueue<Future> queueFuture;
 
@@ -27,8 +27,7 @@ public class QueueExecutorImpl implements QueueExecutor {
     @Override
     public void init(int threads) {
         queue = new ConcurrentLinkedQueue<>();
-        executor = new ThreadPoolExecutor(threads, threads, 0, TimeUnit.DAYS, null);
-        executor.setMaximumPoolSize(threads);
+        executor = Executors.newFixedThreadPool(threads);
     }
 
     @Override
@@ -38,7 +37,7 @@ public class QueueExecutorImpl implements QueueExecutor {
         }
     }
 
-    public ThreadPoolExecutor getExecutor() {
+    public ExecutorService getExecutor() {
         return executor;
     }
 
