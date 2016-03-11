@@ -10,24 +10,40 @@ import mx.com.edx.lightmq.QueueExecutor;
 /**
  *
  * @author edx
- * @version 1.0.1
+ * @version 1.0.2
  * @since 1.0.0
  */
 public class QueueExecutorImpl implements QueueExecutor {
 
-    ExecutorService executor;
-    ConcurrentLinkedQueue<Callable> queue;
-    ConcurrentLinkedQueue<Future> queueFuture;
+    private ExecutorService executor;
+    private ConcurrentLinkedQueue<Callable> queue;
+    private ConcurrentLinkedQueue<Future> queueFuture;
+    private boolean flag;
 
+    @Override
+    public void setDispatchOnArrive(boolean flag) {
+        this.flag = flag;
+    }
+
+    @Override
+    public boolean isDispatchOnArrive() {
+        return this.flag;
+    }
+    
     @Override
     public void addToQueue(Callable message) {
         queue.add(message);
+        if (isDispatchOnArrive()) {
+            processAllMesages();
+        }
     }
 
     @Override
     public void init(int threads) {
         queue = new ConcurrentLinkedQueue<>();
+        queueFuture = new ConcurrentLinkedQueue<>();
         executor = Executors.newFixedThreadPool(threads);
+        setDispatchOnArrive(true);
     }
 
     @Override
@@ -37,15 +53,8 @@ public class QueueExecutorImpl implements QueueExecutor {
         }
     }
 
-    public ExecutorService getExecutor() {
-        return executor;
-    }
-
-    public ConcurrentLinkedQueue<Callable> getQueue() {
-        return queue;
-    }
-
-    public ConcurrentLinkedQueue<Future> getQueueFuture() {
+    @Override
+    public ConcurrentLinkedQueue<Future> getQueueProcesedMsg() {
         return queueFuture;
     }
 
